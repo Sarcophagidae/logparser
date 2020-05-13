@@ -2,27 +2,45 @@ use strict;
 use warnings;
 no warnings 'experimental';
 use 5.020;
+use DBI;
 
-#$variable =~ /(?<count>\d+)/;
-#print "Count is $+{count}";
+my $DEBUG = 0;
+
+my $dbh=DBI->connect("dbi:Pg:dbname=logs","","",{AutoCommit=>0}) or die 'Canno t connect to db';
+
 sub insertToLog{
 	my ($dte,$int_id,$str,$adr) =  @_;
-	print "Inserted to log \n";
-	print "DATE => $dte\n";
-	print "INTID => $int_id\n";
-	print "mail => $adr\n";
-	print "str => $str\n\n";
+	
+	if ($DEBUG){
+		print "Inserted to log \n";
+		print "DATE => $dte\n";
+		print "INTID => $int_id\n";
+		print "mail => $adr\n";
+		print "str => $str\n\n";
+	}
+
+	my $sql = "INSERT INTO log (created, int_id, str, address) values (?,?,?,?)";
+	my $sth = $dbh->prepare($sql);
+	$sth->execute($dte, $int_id, $str, $adr) or die;
 }
 
 sub insertToMessages{
 	my ($dte,$int_id,$str,$adr, $id) =  @_;
-	print "Inserted to MSG \n";
-	print "DATE => $dte\n";
-	print "INTID => $int_id\n";
-	print "mail => $adr\n";
-	print "id => $id\n";
-	print "str => $str\n\n";
+ 	if ($DEBUG){
+		print "Inserted to MSG \n";
+		print "DATE => $dte\n";
+		print "INTID => $int_id\n";
+		print "mail => $adr\n";
+		print "id => $id\n";
+		print "str => $str\n\n";
+	}
+
+	my $sql = "INSERT INTO message (created, id, int_id, str) values (?,?,?,?)";
+	my $sth = $dbh->prepare($sql);
+	$sth->execute($dte, $id, $int_id, $str) or die;
 }
+
+
 
 while (<>){
 	my ($int_id, $dte, $str, $other) = undef;	
@@ -88,3 +106,4 @@ while (<>){
 		}
 	}
 }
+$dbh->commit();
